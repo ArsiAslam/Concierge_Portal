@@ -4,6 +4,7 @@ import {
   Users,
   BarChart3,
   Settings,
+  Home,
 } from 'lucide-react'
 import type { NavSection } from '@/types/navigation'
 import { ROUTES } from './routes'
@@ -20,6 +21,11 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Supply Market',
         href:  ROUTES.SUPPLY_MARKET,
         icon:  ShoppingCart,
+      },
+      {
+        label: 'STR Friendly Markets',
+        href:  '/str-markets',
+        icon:  Home,
       },
     ],
   },
