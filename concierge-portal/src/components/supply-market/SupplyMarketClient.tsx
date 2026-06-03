@@ -160,13 +160,12 @@ export function SupplyMarketClient({ agentData, lenderData }: Props) {
                   }
                 </button>
               </th>
-              <th className="w-64 px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">Distribution</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {pageRows.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-16 text-center">
+                <td colSpan={3} className="py-16 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Search className="h-8 w-8 text-slate-300" />
                     <p className="text-sm text-slate-500">No markets match &ldquo;{search}&rdquo;</p>
@@ -217,28 +216,6 @@ export function SupplyMarketClient({ agentData, lenderData }: Props) {
                       </span>
                     </td>
 
-                    {/* Bar */}
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-                          {!isZero && (
-                            <div
-                              className={cn(
-                                'h-full rounded-full transition-all duration-500',
-                                isTop    ? 'bg-brand-600' :
-                                rank <= 3 ? 'bg-brand-400' :
-                                pct >= 50 ? 'bg-brand-300' :
-                                            'bg-brand-200'
-                              )}
-                              style={{ width: `${pct}%` }}
-                            />
-                          )}
-                        </div>
-                        <span className="w-9 text-right text-xs font-medium text-slate-400">
-                          {isZero ? '—' : `${pct}%`}
-                        </span>
-                      </div>
-                    </td>
                   </tr>
                 )
               })
