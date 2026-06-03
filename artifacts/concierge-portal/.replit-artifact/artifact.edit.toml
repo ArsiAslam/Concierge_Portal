@@ -1,0 +1,22 @@
+kind = "web"
+previewPath = "/"
+title = "Concierge Portal"
+version = "1.0.0"
+id = "artifacts/concierge-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = ["/"]
+localPort = 24078
+
+[services.development]
+run = "cd artifacts/concierge-portal && npm run dev -- --port 24078"
+
+[services.production]
+build = ["sh", "-c", "cd artifacts/concierge-portal && npm run build"]
+publicDir = "artifacts/concierge-portal/.next"
+serve = "static"
+
+[services.env]
+PORT = "24078"

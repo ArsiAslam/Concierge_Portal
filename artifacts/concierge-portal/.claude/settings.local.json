@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\ur321\\\\Desktop\\\\concierge_portal\\\\supabase\\\\migrations\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Output \"Directory ready\")",
+      "PowerShell(New-Item *)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ur321\\\\Desktop\\\\concierge_portal\\\\src\\\\app\\\\\\(dashboard\\)\\\\admin\\\\users\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ur321\\\\Desktop\\\\concierge_portal\\\\src\\\\app\\\\\\(dashboard\\)\\\\admin\\\\roles\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ur321\\\\Desktop\\\\concierge_portal\\\\src\\\\app\\\\\\(dashboard\\)\\\\settings\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ur321\\\\Desktop\\\\concierge_portal\\\\src\\\\app\\\\\\(dashboard\\)\\\\reports\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\ur321\\\\Desktop\\\\concierge_portal\\\\src\\\\components\\\\admin\")",
+      "Bash(Write-Output \"Directories created\")",
+      "Bash(npm install *)",
+      "Bash(Get-Content *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(npm uninstall *)",
+      "WebFetch(domain:gwmdlsaxwcydlgvmqjla.supabase.co)",
+      "Bash(curl *)"
+    ]
+  }
+}
