@@ -15,17 +15,7 @@ paths = [ "/" ]
 localPort = 24078
 
 [services.development]
-run = "pnpm --filter @workspace/concierge-portal run dev"
-
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/concierge-portal", "run", "build" ]
-publicDir = "artifacts/concierge-portal/dist/public"
-serve = "static"
-
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+run = "cd artifacts/concierge-portal && npm run dev -- --port 24078"
 
 [services.env]
 PORT = "24078"
-BASE_PATH = "/"
