@@ -182,8 +182,8 @@ export function UserManagementClient({ initialUsers, isAdmin }: Props) {
                       {user.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-500">
-                    {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  <td className="px-4 py-3 text-xs text-slate-500" suppressHydrationWarning>
+                    {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
                   </td>
                   {isAdmin && (
                     <td className="px-4 py-3">
