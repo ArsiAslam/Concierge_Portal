@@ -1,9 +1,6 @@
 import { getAuthUser } from '@/lib/auth/helpers'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
-import {
-  ShoppingCart, TrendingUp, Package,
-  Clock,
-} from 'lucide-react'
+import { ShoppingCart, Package, Clock } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,10 +32,9 @@ export default async function DashboardPage() {
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {[
             { label: 'Supply Market', href: '/supply-market', icon: ShoppingCart, desc: 'Manage inventory' },
-            { label: 'Reports',       href: '/reports',       icon: TrendingUp,   desc: 'View analytics'  },
           ].map((action) => (
             <a
               key={action.label}
@@ -58,18 +54,11 @@ export default async function DashboardPage() {
       </Card>
 
       {/* Placeholder for future widgets */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="flex flex-col items-center justify-center py-12 text-center">
-          <Package className="h-8 w-8 text-slate-300" />
-          <p className="mt-2 text-sm font-medium text-slate-600">Supply Market</p>
-          <p className="mt-0.5 text-xs text-slate-400">Stats will appear here once set up</p>
-        </Card>
-        <Card className="flex flex-col items-center justify-center py-12 text-center">
-          <TrendingUp className="h-8 w-8 text-slate-300" />
-          <p className="mt-2 text-sm font-medium text-slate-600">Analytics</p>
-          <p className="mt-0.5 text-xs text-slate-400">Reports coming in the next sprint</p>
-        </Card>
-      </div>
+      <Card className="flex flex-col items-center justify-center py-12 text-center">
+        <Package className="h-8 w-8 text-slate-300" />
+        <p className="mt-2 text-sm font-medium text-slate-600">Supply Market</p>
+        <p className="mt-0.5 text-xs text-slate-400">Stats will appear here once set up</p>
+      </Card>
     </div>
   )
 }

@@ -27,9 +27,10 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'Analytics',
     items: [
       {
-        label: 'Reports',
-        href:  '/reports',
-        icon:  BarChart3,
+        label:              'Reports',
+        href:               '/reports',
+        icon:               BarChart3,
+        requiredPermission: 'reports:read',
       },
     ],
   },
