@@ -1,7 +1,7 @@
 import { getAuthUser } from '@/lib/auth/helpers'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import {
-  ShoppingCart, Users, TrendingUp, Package,
+  ShoppingCart, TrendingUp, Package,
   Clock,
 } from 'lucide-react'
 
@@ -35,12 +35,10 @@ export default async function DashboardPage() {
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Supply Market', href: '/supply-market', icon: ShoppingCart, desc: 'Manage inventory' },
             { label: 'Reports',       href: '/reports',       icon: TrendingUp,   desc: 'View analytics'  },
-            { label: 'Team',          href: '/admin/users',   icon: Users,        desc: 'Manage users'    },
-            { label: 'Settings',      href: '/settings',      icon: Package,      desc: 'Preferences'     },
           ].map((action) => (
             <a
               key={action.label}
