@@ -1,8 +1,15 @@
 /** @type {import('next').NextConfig} */
+
+const replitDomain = process.env.REPLIT_DEV_DOMAIN || ''
+
 const nextConfig = {
   experimental: {
     serverActions: {
-      allowedOrigins: ['*'],
+      allowedOrigins: [
+        'localhost:3000',
+        replitDomain,
+        `${replitDomain}:3000`,
+      ].filter(Boolean),
     },
   },
   headers: async () => [
@@ -20,7 +27,7 @@ const nextConfig = {
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob: https:",
             "font-src 'self'",
-            "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+            `connect-src 'self' https://*.supabase.co wss://*.supabase.co${replitDomain ? ` https://${replitDomain}` : ''}`,
             "frame-ancestors 'self'",
           ].join('; '),
         },
