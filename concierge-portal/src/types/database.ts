@@ -68,7 +68,6 @@ export interface Database {
         }
       }
 
-      // ✅ ADD THIS
       str_markets: {
         Row: {
           id: number
@@ -93,3 +92,19 @@ export interface Database {
     }
   }
 }
+
+/* =========================
+   ✅ ADDED CLEAN TYPE ALIASES
+   ========================= */
+
+export type UserRow =
+  Database['public']['Tables']['profiles']['Row']
+
+export type ProfileRow =
+  Database['public']['Tables']['profiles']['Row']
+
+export type SupplyItemRow =
+  Database['public']['Tables']['supply_items']['Row']
+
+export type STRMarketRow =
+  Database['public']['Tables']['str_markets']['Row']
