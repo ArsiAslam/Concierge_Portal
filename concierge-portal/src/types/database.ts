@@ -1,5 +1,3 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
-
 export interface Database {
   public: {
     Tables: {
@@ -30,6 +28,7 @@ export interface Database {
           updated_at?: string
         }
       }
+
       supply_items: {
         Row: {
           id: string
@@ -68,18 +67,29 @@ export interface Database {
           updated_at?: string
         }
       }
+
+      // ✅ ADD THIS
+      str_markets: {
+        Row: {
+          id: number
+          market: string
+          agents: number
+          added_by_name: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          market: string
+          agents?: number
+          added_by_name?: string | null
+          created_at?: string
+        }
+        Update: {
+          market?: string
+          agents?: number
+          added_by_name?: string | null
+        }
+      }
     }
   }
-}
-
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type SupplyItem = Database['public']['Tables']['supply_items']['Row']
-
-export interface UserRow {
-  id: string
-  email: string
-  full_name: string | null
-  role: string | null
-  is_active: boolean
-  created_at: string
 }
