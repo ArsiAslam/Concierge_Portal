@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { User, Shield, Bell } from 'lucide-react'
 import type { Metadata } from 'next'
+import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm'
 
 export const metadata: Metadata = { title: 'Settings' }
 export const dynamic = 'force-dynamic'
@@ -78,6 +79,18 @@ export default async function SettingsPage() {
           <p className="text-sm text-slate-500">Notification preferences coming soon.</p>
         </Card>
       </div>
+
+      {/* Change Password */}
+<Card>
+  <CardHeader>
+    <div className="flex items-center gap-2">
+      <Shield className="h-4 w-4 text-brand-600" />
+      <CardTitle>Change Password</CardTitle>
+    </div>
+  </CardHeader>
+
+  <ChangePasswordForm />
+</Card>
 
     </div>
   )
