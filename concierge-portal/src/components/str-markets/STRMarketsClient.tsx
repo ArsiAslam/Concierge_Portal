@@ -1,19 +1,14 @@
 'use client'
 
-import { useState, useMemo, useTransition, useRef, useEffect } from 'react'
-import { Trash2 } from 'lucide-react'
+import { useState, useMemo, useTransition, useRef, useEffect, useCallback } from 'react'
+import { Trash2, Search } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { MARKETS } from '@/constants/markets'
+import type { STRMarketRow } from '@/types/database'
 
-export type STRMarket = {
-  id: number
-  market: string
-  agents: number
-  added_by_name: string | null
-  created_at: string
-}
+export type STRMarket = STRMarketRow
 
 interface Props {
   initialMarkets: STRMarket[]
@@ -23,68 +18,100 @@ interface Props {
 export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
   const supabase = createClient()
 
+  // LOCAL + DB (keep add form separate)
   const [markets, setMarkets] = useState<STRMarket[]>(initialMarkets)
+
+  // 🔥 SINGLE SOURCE OF TRUTH FOR TABLE
   const [liveMarkets, setLiveMarkets] = useState<STRMarket[]>([])
 
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState('')
-  const [search, setSearch] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+
+  // ✅ LIVE SEARCH
+  const [liveSearchTerm, setLiveSearchTerm] = useState('')
 
   const [formError, setFormError] = useState('')
   const [formSuccess, setFormSuccess] = useState('')
 
   const [isPending, startTransition] = useTransition()
-  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // ─────────────────────────────
-  // FETCH LIVE TABLE DATA
+  // 🔥 ALWAYS FETCH FULL DB ON LOAD
   // ─────────────────────────────
-  async function fetchAllMarkets() {
+  const fetchAllMarkets = useCallback(async () => {
     const { data, error } = await supabase
       .from('str_markets')
       .select('id, market, agents')
       .order('agents', { ascending: false })
 
-    if (!error && data) {
-      setLiveMarkets(data)
+    if (error) {
+      console.error(error)
+      return
     }
-  }
+
+    if (data) {
+      setLiveMarkets(data as STRMarket[])
+    }
+  }, [supabase])
 
   useEffect(() => {
     fetchAllMarkets()
+  }, [fetchAllMarkets])
+
+  // ─────────────────────────────
+  // CLICK OUTSIDE DROPDOWN
+  // ─────────────────────────────
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   // ─────────────────────────────
-  // Suggestions
+  // ADD SUGGESTIONS
   // ─────────────────────────────
   const suggestions = useMemo(() => {
     if (!query) return []
 
     const q = query.toLowerCase()
-    const existing = new Set(markets.map(m => m.market))
+    const existing = new Set(markets.map(m => m.market.toLowerCase()))
 
     return MARKETS
-      .filter(m => m.toLowerCase().includes(q) && !existing.has(m))
-      .slice(0, 8)
+      .filter(m => m.toLowerCase().includes(q))
+      .slice(0, 10)
+      .map(m => ({
+        name: m,
+        exists: existing.has(m.toLowerCase())
+      }))
   }, [query, markets])
-
-  // ─────────────────────────────
-  // Filtered list
-  // ─────────────────────────────
-  const filtered = useMemo(() => {
-    if (!search) return markets
-
-    return markets.filter(m =>
-      m.market.toLowerCase().includes(search.toLowerCase())
-    )
-  }, [markets, search])
 
   function pickSuggestion(value: string) {
     setSelected(value)
     setQuery(value)
     setShowDropdown(false)
+    setFormError('')
+    setFormSuccess('')
   }
+
+  // ─────────────────────────────
+  // 🔥 FILTER LIVE TABLE (FIXED)
+  // ─────────────────────────────
+  const filteredLiveMarkets = useMemo(() => {
+    if (!liveSearchTerm.trim()) return liveMarkets
+
+    const term = liveSearchTerm.toLowerCase().trim()
+
+    return liveMarkets.filter(m =>
+      (m.market || '').toLowerCase().includes(term)
+    )
+  }, [liveMarkets, liveSearchTerm])
 
   // ─────────────────────────────
   // ADD MARKET
@@ -96,15 +123,21 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
     setFormSuccess('')
 
     startTransition(async () => {
+      const { data: existing } = await supabase
+        .from('str_markets')
+        .select('id')
+        .eq('market', selected)
+        .maybeSingle()
+
+      if (existing) {
+        setFormError('Market already exists')
+        return
+      }
+
       const { data, error } = await supabase
         .from('str_markets')
-        .insert([
-          {
-            market: selected,
-            agents: 0,
-          },
-        ] as any)
-        .select('*')
+        .insert({ market: selected, agents: 0 } as any)
+        .select()
         .single()
 
       if (error) {
@@ -112,23 +145,19 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
         return
       }
 
-      if (!data) {
-        setFormError('No data returned')
-        return
-      }
-
       setMarkets(prev => [data, ...prev])
-      setFormSuccess('Market added successfully')
 
       setQuery('')
       setSelected('')
 
+      // 🔥 REFRESH DB AFTER INSERT
       await fetchAllMarkets()
+      setFormSuccess('Market added')
     })
   }
 
   // ─────────────────────────────
-  // REMOVE MARKET
+  // REMOVE
   // ─────────────────────────────
   function handleRemove(id: number) {
     startTransition(async () => {
@@ -143,7 +172,6 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
       }
 
       setMarkets(prev => prev.filter(m => m.id !== id))
-
       await fetchAllMarkets()
     })
   }
@@ -156,13 +184,10 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
 
       {/* ADD MARKET */}
       <Card>
-        <div className="mb-3 text-sm font-semibold">
-          Add STR Market
-        </div>
+        <div className="mb-3 font-semibold">Add STR Market</div>
 
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <input
-            ref={inputRef}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value)
@@ -174,101 +199,81 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
           />
 
           {showDropdown && suggestions.length > 0 && (
-            <div className="absolute z-10 w-full bg-white border mt-1 rounded">
+            <div className="absolute z-10 w-full bg-white border mt-1 rounded shadow max-h-60 overflow-auto">
               {suggestions.map(s => (
                 <div
-                  key={s}
-                  onMouseDown={() => pickSuggestion(s)}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  key={s.name}
+                  onMouseDown={() => pickSuggestion(s.name)}
+                  className={`p-2 cursor-pointer hover:bg-gray-100 ${
+                    s.exists ? 'opacity-50' : ''
+                  }`}
                 >
-                  {s}
+                  {s.name}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {formError && (
-          <p className="text-red-500 text-sm mt-2">{formError}</p>
-        )}
-
-        {formSuccess && (
-          <p className="text-green-600 text-sm mt-2">{formSuccess}</p>
-        )}
-
-        <Button
-          className="mt-3"
-          onClick={handleAdd}
-          disabled={!selected || isPending}
-        >
+        <Button className="mt-3" onClick={handleAdd} disabled={!selected || isPending}>
           Add Market
         </Button>
-      </Card>
 
-      {/* LIST */}
-      <Card>
-        <div className="p-2 border-b">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter markets..."
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
-        <ul>
-          {filtered.map(m => (
-            <li
-              key={m.id}
-              className="flex justify-between p-3 border-b"
-            >
-              <div>
-                <p className="font-semibold">{m.market}</p>
-                <p className="text-xs text-gray-500">
-                  Agents: {m.agents ?? 0}
-                </p>
-              </div>
-
-              {isAdmin && (
-                <button
-                  onClick={() => handleRemove(m.id)}
-                  className="text-red-500"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
+        {formError && <p className="text-red-500 text-sm">{formError}</p>}
+        {formSuccess && <p className="text-green-600 text-sm">{formSuccess}</p>}
       </Card>
 
       {/* LIVE TABLE */}
       <Card>
-        <div className="p-3 border-b font-semibold">
-          Market Performance Table
+        <div className="p-3 border-b font-semibold flex justify-between">
+          <span>Market Performance Table</span>
+          <span className="text-xs text-gray-500">
+            {filteredLiveMarkets.length} / {liveMarkets.length}
+          </span>
         </div>
 
+        {/* SEARCH */}
+        <div className="p-3 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <input
+              value={liveSearchTerm}
+              onChange={(e) => setLiveSearchTerm(e.target.value)}
+              placeholder="Search live markets..."
+              className="w-full border rounded pl-9 p-2"
+            />
+          </div>
+        </div>
+
+        {/* TABLE */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50">
+              <tr className="bg-gray-50 border-b">
                 <th className="text-left p-3">Market</th>
                 <th className="text-left p-3">Agents</th>
               </tr>
             </thead>
 
             <tbody>
-              {liveMarkets.map(m => (
-                <tr key={m.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-medium">{m.market}</td>
-                  <td className="p-3">{m.agents ?? 0}</td>
+              {filteredLiveMarkets.length === 0 ? (
+                <tr>
+                  <td className="p-4 text-center text-gray-500" colSpan={2}>
+                    No markets found
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                filteredLiveMarkets.map(m => (
+                  <tr key={m.id} className="border-b">
+                    <td className="p-3">{m.market}</td>
+                    <td className="p-3">{m.agents ?? 0}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </Card>
-
     </div>
   )
 }
