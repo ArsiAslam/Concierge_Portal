@@ -33,8 +33,6 @@ export default async function SupplyMarketPage() {
     getLenderSupply(),
   ])
 
-  const markets = agentData.map((r) => r.market)
-
   return (
     <div className="space-y-6">
       <div>
@@ -44,7 +42,7 @@ export default async function SupplyMarketPage() {
         </p>
       </div>
 
-      <MarketSearchClient markets={markets} />
+      <MarketSearchClient />
       <SupplyMarketClient agentData={agentData} lenderData={lenderData} />
     </div>
   )

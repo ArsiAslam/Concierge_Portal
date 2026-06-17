@@ -6,10 +6,6 @@ import { Button } from '@/components/ui/Button'
 import { MARKETS } from '@/constants/markets'
 import { cn } from '@/lib/utils/cn'
 
-interface Props {
-  markets: string[]
-}
-
 interface SearchResult {
   market: string
   count:  number
@@ -50,8 +46,8 @@ async function countAll(market: string): Promise<number> {
   return total
 }
 
-export function MarketSearchClient({ markets }: Props) {
-  const allMarkets = markets.length > 0 ? markets : MARKETS
+export function MarketSearchClient() {
+  const allMarkets = MARKETS
 
   const [query, setQuery]                     = useState('')
   const [selectedMarket, setSelectedMarket]   = useState('')
