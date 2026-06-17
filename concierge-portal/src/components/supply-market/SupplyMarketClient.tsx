@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Users, Landmark, TrendingUp, MapPin, Search, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react'
+import { Users, Landmark, TrendingUp, MapPin, Search, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Download } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils/cn'
 import type { AgentRow, LenderRow } from '@/app/(dashboard)/supply-market/page'
 
@@ -19,6 +20,7 @@ export function SupplyMarketClient({ agentData, lenderData }: Props) {
   const [search, setSearch]       = useState('')
   const [page, setPage]           = useState(1)
   const [sortDir, setSortDir]     = useState<'desc' | 'asc'>('desc')
+  const [isExporting, setIsExporting] = useState(false)
 
   const isAgent  = activeTab === 'agent'
   const allRows  = isAgent ? agentData : lenderData
@@ -56,6 +58,26 @@ export function SupplyMarketClient({ agentData, lenderData }: Props) {
     desc.forEach((r, i) => m.set(r.id, i + 1))
     return m
   }, [allRows, countKey])
+
+  async function handleExport(): Promise<void> {
+    setIsExporting(true)
+
+    try {
+      const { utils, writeFile } = await import('xlsx')
+      const payload = filtered.map((row) => ({
+        Rank: rankMap.get(row.id) ?? 0,
+        Market: row.market,
+        [isAgent ? 'Agents' : 'Lenders']: (row as any)[countKey],
+      }))
+
+      const worksheet = utils.json_to_sheet(payload)
+      const workbook = utils.book_new()
+      utils.book_append_sheet(workbook, worksheet, isAgent ? 'Agent Supply' : 'Lender Supply')
+      writeFile(workbook, `supply-market-${isAgent ? 'agents' : 'lenders'}.xlsx`)
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab)
@@ -136,6 +158,17 @@ export function SupplyMarketClient({ agentData, lenderData }: Props) {
               className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleExport}
+            loading={isExporting}
+            disabled={filtered.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
           {search && (
             <span className="text-xs text-slate-500">
               {filtered.length} result{filtered.length !== 1 ? 's' : ''}

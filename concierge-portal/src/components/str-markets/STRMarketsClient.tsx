@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition, useRef, useEffect, useCallback } from 'react'
-import { Trash2, Search } from 'lucide-react'
+import { Trash2, Search, Download } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
@@ -28,6 +28,7 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
   const [selected, setSelected] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   // ✅ LIVE SEARCH
   const [liveSearchTerm, setLiveSearchTerm] = useState('')
@@ -112,6 +113,25 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
       (m.market || '').toLowerCase().includes(term)
     )
   }, [liveMarkets, liveSearchTerm])
+
+  async function handleExport(): Promise<void> {
+    setIsExporting(true)
+
+    try {
+      const { utils, writeFile } = await import('xlsx')
+      const payload = filteredLiveMarkets.map((row) => ({
+        Market: row.market,
+        Agents: row.agents ?? 0,
+      }))
+
+      const worksheet = utils.json_to_sheet(payload)
+      const workbook = utils.book_new()
+      utils.book_append_sheet(workbook, worksheet, 'STR Friendly Markets')
+      writeFile(workbook, 'str-friendly-markets.xlsx')
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   // ─────────────────────────────
   // ADD MARKET
@@ -225,11 +245,24 @@ export function STRMarketsClient({ initialMarkets, isAdmin }: Props) {
 
       {/* LIVE TABLE */}
       <Card>
-        <div className="p-3 border-b font-semibold flex justify-between">
+        <div className="p-3 border-b font-semibold flex flex-wrap items-center justify-between gap-3">
           <span>Market Performance Table</span>
-          <span className="text-xs text-gray-500">
-            {filteredLiveMarkets.length} / {liveMarkets.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleExport}
+              loading={isExporting}
+              disabled={filteredLiveMarkets.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+            <span className="text-xs text-gray-500">
+              {filteredLiveMarkets.length} / {liveMarkets.length}
+            </span>
+          </div>
         </div>
 
         {/* SEARCH */}
