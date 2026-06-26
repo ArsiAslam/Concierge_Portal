@@ -14,7 +14,7 @@ jobs:
   sync-agents:
     name: Sync agent_supply from BiggerPockets → Supabase
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 180
 
     steps:
       - name: Checkout repo
@@ -34,7 +34,7 @@ jobs:
   sync-str-markets:
     name: Sync str_markets from BiggerPockets → Supabase
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 180
 
     steps:
       - name: Checkout repo

@@ -105,7 +105,7 @@ async function getAgentCount(market) {
     }
 
     page++;
-    await sleep(300); // avoid BP rate limits
+    await sleep(500); // avoid BP rate limits
   }
 
   log(`  ✓ "${market}" final active agent count: ${totalActive}`);
