@@ -29,7 +29,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/sync-agents.js
+        run: node concierge-portal/scripts/sync-agents.js
 
   sync-str-markets:
     name: Sync str_markets from BiggerPockets → Supabase
@@ -49,4 +49,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/sync-str-markets.js
+        run: node concierge-portal/scripts/sync-str-markets.js
