@@ -5,7 +5,7 @@ on:
     # Runs every 40 minutes
     # Note: GitHub Actions cron minimum granularity is 5 minutes
     # and may run a few minutes late — this is expected
-    - cron: "*/40 * * * *"
+    - cron: "0 0 * * *"
 
   # Allow manual trigger from GitHub Actions UI
   workflow_dispatch:
